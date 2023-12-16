@@ -7,20 +7,70 @@
 class SerialComm
 {
 private:
-    HANDLE hSerial;              // Handle to the serial connection
-    LPCSTR ComPort;              // Serial port to connect to
-    DCB dcbSerialParams = {0};   // Stores the state of the serial port
-    COMMTIMEOUTS timeouts = {0}; // Struct storing timeout settings
+    HANDLE hSerial;                      /* Handle to the serial connection */
+    LPCSTR ComPort;                      /* Serial port to connect to */
+    DCB dcbSerialParams = {0};           /* Stores the state of the serial port */
+    COMMTIMEOUTS timeouts = {0};         /* Struct storing timeout settings */
+    BOOL bConnectionInitialised = FALSE; /* Flag storing whether handle has been initialised */
 
 public:
     // Constructor just stores value of COM port to use.
     SerialComm(
         LPCSTR ComPort /* String with ComPort to use. */
-        ) : ComPort(ComPort)
+    )
     {
+        SetComPort(ComPort);
     }
 
+    // Set port to connect to
+    void SetComPort(
+        LPCSTR ComPort /* String with ComPort to use. */
+    )
+    {
+        SerialComm::ComPort = ComPort;
+    }
+
+    /* GETTERS */
+
+    // Get serial port connected to
+    LPCSTR GetComPort()
+    {
+        return ComPort;
+    }
+
+    // Get the connection initialised flag
+    BOOL GetConnectionInitialised()
+    {
+        return bConnectionInitialised;
+    }
+
+    // Get handle to serial connection.
+    HANDLE GetHandle()
+    {
+        if (!GetConnectionInitialised())
+        {
+            // Connection handle holds is not initialised
+            printf("Handle points to uninitialised connection");
+        }
+        return hSerial;
+    }
+
+    // Get DCB settings
+    DCB GetDCBSerialParams()
+    {
+        return dcbSerialParams;
+    }
+
+    // Get timeout params
+    COMMTIMEOUTS GetTimeouts()
+    {
+        return timeouts;
+    }
+
+
     /*  OPEN AND CLOSE CONNECTIONS  */
+
+
 
     bool OpenSerialConnection()
     {
@@ -44,6 +94,9 @@ public:
             printf("Some error occurred when initialising port.\n");
             return FALSE;
         }
+
+        // Raise connection initialised flag
+        bConnectionInitialised = TRUE;
         return TRUE;
     }
 
@@ -55,6 +108,9 @@ public:
             std::cerr << "Error closing the serial connection.\n";
             return FALSE;
         };
+
+        // Lower connection initialised flag
+        bConnectionInitialised = FALSE;
         return TRUE;
     }
 
@@ -75,6 +131,13 @@ public:
         timeouts.WriteTotalTimeoutConstant = WriteTotalTimeoutConstant;
         timeouts.WriteTotalTimeoutMultiplier = WriteTotalTimeoutMultiplier;
 
+        if (!bConnectionInitialised)
+        {
+            // Connection has not been initialised
+            printf("Serial connection not initialised.\n");
+            return FALSE;
+        }
+
         if (!SetCommTimeouts(hSerial, &timeouts))
         {
             // Error occurred setting timeouts
@@ -92,12 +155,21 @@ public:
         int Parity = NOPARITY)
     {
         // Initialise DCB struct to store config of serial connection
+
+        if (!bConnectionInitialised)
+        {
+            // Connection has not been initialised
+            printf("Serial connection not initialised.\n");
+            return FALSE;
+        }
+
         if (!GetCommState(hSerial, &dcbSerialParams))
         {
             // Error getting state
             printf("Error getting state from serial handle.\n");
             return FALSE;
         }
+
         dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
         // Set params to RP Pico default
         dcbSerialParams.BaudRate = BaudRate;
