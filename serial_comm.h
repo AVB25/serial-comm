@@ -17,9 +17,8 @@ public:
     // Constructor just stores value of COM port to use.
     SerialComm(
         LPCSTR ComPort /* String with ComPort to use. */
-    )
+        ) : ComPort(ComPort)
     {
-        SetComPort(ComPort);
     }
 
     // Set port to connect to
@@ -67,10 +66,7 @@ public:
         return timeouts;
     }
 
-
     /*  OPEN AND CLOSE CONNECTIONS  */
-
-
 
     bool OpenSerialConnection()
     {
