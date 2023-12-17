@@ -143,15 +143,9 @@ public:
         return TRUE;
     }
 
-    // Default connection configs are set to RP Pico default
-    bool SetSerialConnectionConfig(
-        int BaudRate = CBR_19200,
-        int ByteSize = 8,
-        int StopBits = ONESTOPBIT,
-        int Parity = NOPARITY)
+    // Initialise DCB struct to store config of serial connection
+    bool SetSerialConnectionConfig(int BaudRate, int ByteSize, int StopBits, int Parity)
     {
-        // Initialise DCB struct to store config of serial connection
-
         if (!bConnectionInitialised)
         {
             // Connection has not been initialised
