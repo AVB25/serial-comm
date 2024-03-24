@@ -1,5 +1,51 @@
 #include "pico_comm.h"
-# include <string>
+#include <string>
+
+// FIXME The length of the read and write buffers should not be fixed. Need to figure out how to
+// do that
+const DWORD dwReadBuffLength = 10;
+const DWORD dwWriteBuffLength = 3;
+
+bool ReadPort(BYTE (*bBuffer)[dwReadBuffLength + 1], SerialComm* SerialManager){
+// Read port managed by the SerialManager and store the output to
+// the passed buffer.
+int iIn;
+std::cout << "Press any key to read buffer. Input '-1' to exit: ";
+    std::cin >> iIn;
+    if (iIn != -1){
+        DWORD dwBytesRead;
+        (*SerialManager).ReadBytes(bBuffer, dwReadBuffLength, &dwBytesRead);
+        if (dwBytesRead != dwReadBuffLength){
+            // Haven't read the desired number of bytes. For now, error.
+            std::cerr << "Requested " << dwReadBuffLength << " bytes, but got " << dwBytesRead << ".\n";
+            return FALSE;
+        }
+
+        printf("Bytes read: ");
+        for (int i = 0; i < sizeof(*bBuffer); i++){
+            printf("%c ", (*bBuffer)[i]);
+            printf("%u ", (*bBuffer)[i]);
+        }
+        printf("\n");
+        return TRUE;
+    }
+    return TRUE;
+}
+
+bool WriteToPort(BYTE (*bData)[dwWriteBuffLength + 1], SerialComm* SerialManager){
+// Write the contents of the passed byte array to the port managed by
+// the SerialManager.
+
+    DWORD dwBytesWritten;
+    (*SerialManager).WriteBytes(bData, dwWriteBuffLength, &dwBytesWritten);
+    if (dwBytesWritten != dwReadBuffLength){
+        // Havent' written the desired number of bytes.
+        std::cerr << "Gave " << dwWriteBuffLength << " bytes to write, but only wrote ";
+        std::cerr << dwBytesWritten << ".\n";
+        return FALSE;
+    }
+    return TRUE;
+}
 
 int main(){
     std::string CommPort;
