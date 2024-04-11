@@ -38,10 +38,12 @@ bool WriteToPort(BYTE (*bData)[dwWriteBuffLength + 1], SerialComm* SerialManager
 
     DWORD dwBytesWritten;
     (*SerialManager).WriteBytes(bData, dwWriteBuffLength, &dwBytesWritten);
-    if (dwBytesWritten != dwReadBuffLength){
+    if (dwBytesWritten != dwWriteBuffLength){
         // Havent' written the desired number of bytes.
         std::cerr << "Gave " << dwWriteBuffLength << " bytes to write, but only wrote ";
         std::cerr << dwBytesWritten << ".\n";
+        std::cerr << "dwWriteBuffLength: " << dwWriteBuffLength << "\n";
+        std::cerr << "dwBytesWritten: " << dwBytesWritten << "\n";
         return FALSE;
     }
     return TRUE;
@@ -87,6 +89,11 @@ int main(){
                 bWriteBuffer[i] = (BYTE)_Input[i];
             }
             bWriteBuffer[dwWriteBuffLength] = NULL;
+            printf("Trying to write array ");
+            for (int i = 0; i < dwWriteBuffLength; i++){
+                printf("%x::", bWriteBuffer[i]);
+            };
+            printf("\n");
 
             WriteToPort(&bWriteBuffer, &SerialManager);
         }
